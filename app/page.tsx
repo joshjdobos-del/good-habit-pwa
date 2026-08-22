@@ -49,13 +49,12 @@ export default function LandingPage() {
               Go to Dashboard →
             </Link>
           ) : (
-            <button
-              onClick={handleGetStarted}
-              disabled={loading}
-              className="text-xs font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition-colors py-2 px-3.5 rounded-lg"
+            <Link
+              href="/login"
+              className="text-xs font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition-colors py-2 px-3.5 rounded-lg inline-block"
             >
               Sign In
-            </button>
+            </Link>
           )}
         </div>
       </header>
@@ -130,7 +129,7 @@ export default function LandingPage() {
         <div className="grid sm:grid-cols-3 gap-6 w-full max-w-4xl mt-20 text-left">
           <div className="bg-slate-800/30 border border-slate-800/80 rounded-xl p-5">
             <div className="text-2xl mb-2">🗨️</div>
-            <h3 className="font-bold text-white text-base mb-1">PWA Native</h3>
+            <h3 className="font-bold text-white text-base mb-1">Easy Accountability</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
               A private link available for you to share with a trusted person in your life so they can view your progress in real time.
             </p>

@@ -10,9 +10,10 @@ export default function DashboardPage() {
   const router = useRouter();
 
   const [completedDays, setCompletedDays] = useState<number[]>([1, 2, 3, 4, 5]);
+  const [isAnonymous, setIsAnonymous] = useState(false); // Anonymity State
   const currentDay = 6;
   const totalDays = 30;
-  const habitTitle = '30 Days of No Doomscrolling';
+  const habitTitle = '30 Days of Morning Movement';
 
   const isTodayCompleted = completedDays.includes(currentDay);
 
@@ -42,42 +43,90 @@ export default function DashboardPage() {
       </div>
 
       {/* Header Navigation */}
-      <header className="relative z-10 max-w-6xl w-full mx-auto px-6 py-5 flex items-center justify-between border-b border-slate-800/80">
-        <Link href="/dashboard" className="flex items-center gap-2.5">
+      <header className="relative z-10 max-w-6xl w-full mx-auto px-4 sm:px-6 py-4 flex items-center justify-between border-b border-slate-800/80">
+        <Link href="/dashboard" className="flex items-center gap-2.5 shrink-0">
           <img
             src="/icon-192.png"
             alt="Good Habit Logo"
             className="w-8 h-8 rounded-lg object-cover"
           />
-          <span className="text-xl font-extrabold tracking-tight text-white">
+          <span className="text-lg sm:text-xl font-extrabold tracking-tight text-white whitespace-nowrap">
             Good<span className="text-emerald-400">Habit</span>
           </span>
         </Link>
 
-        <nav className="flex items-center gap-4 text-xs font-semibold">
-          <Link
-            href="/dashboard"
-            className="text-emerald-400 font-bold border-b-2 border-emerald-400 pb-0.5"
-          >
-            Dashboard
-          </Link>
-          <Link
-            href="/community"
-            className="text-slate-400 hover:text-white transition-colors"
-          >
-            Community
-          </Link>
+        <div className="flex items-center gap-4">
+          <nav className="hidden sm:flex items-center gap-4 text-xs font-semibold">
+            <Link
+              href="/dashboard"
+              className="text-emerald-400 font-bold border-b-2 border-emerald-400 pb-0.5"
+            >
+              Dashboard
+            </Link>
+            <Link
+              href="/community"
+              className="text-slate-400 hover:text-white transition-colors"
+            >
+              Community
+            </Link>
+          </nav>
+
           <button
             onClick={handleSignOut}
-            className="text-slate-400 hover:text-slate-200 bg-slate-800 border border-slate-700 py-1.5 px-3 rounded-lg transition-colors ml-2"
+            className="text-slate-400 hover:text-slate-200 bg-slate-800 border border-slate-700 text-xs py-1.5 px-3 rounded-lg transition-colors font-semibold shrink-0"
           >
             Sign Out
           </button>
-        </nav>
+        </div>
       </header>
 
       {/* Main Content */}
       <main className="relative z-10 max-w-3xl w-full mx-auto px-6 pt-8 flex-1">
+        
+        {/* Privacy / Identity Toggle */}
+        <div className="bg-slate-800/50 border border-slate-800/80 rounded-2xl p-4 mb-6 backdrop-blur-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-slate-900 border border-slate-700 flex items-center justify-center text-sm">
+              {isAnonymous ? '🕵️‍♂️' : '👤'}
+            </div>
+            <div>
+              <span className="text-xs font-extrabold text-white block">
+                Community Privacy Profile
+              </span>
+              <span className="text-[11px] text-slate-400">
+                {isAnonymous
+                  ? 'Appearing as "Anonymous" in local community feeds'
+                  : 'Appearing with your First Name in local community feeds'}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex bg-slate-900/90 border border-slate-700/80 rounded-xl p-1 w-full sm:w-auto">
+            <button
+              type="button"
+              onClick={() => setIsAnonymous(false)}
+              className={`flex-1 sm:flex-none text-xs font-bold px-3.5 py-1.5 rounded-lg transition-all ${
+                !isAnonymous
+                  ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/10'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              First Name
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsAnonymous(true)}
+              className={`flex-1 sm:flex-none text-xs font-bold px-3.5 py-1.5 rounded-lg transition-all ${
+                isAnonymous
+                  ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/10'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              Anonymous
+            </button>
+          </div>
+        </div>
+
         {/* Active Challenge Header */}
         <div className="bg-slate-800/40 border border-slate-800 rounded-2xl p-6 backdrop-blur-sm shadow-xl mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-slate-800 pb-4">
