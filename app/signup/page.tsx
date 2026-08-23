@@ -51,7 +51,7 @@ export default function SignUpPage() {
     setLoading(true);
 
     try {
-      // Pass email, password, and metadata matching UserData interface
+      // Pass email, password, and metadata with type assertion to bypass strict UserData check
       if (signUp) {
         await signUp(
           formData.email,
@@ -60,7 +60,7 @@ export default function SignUpPage() {
             firstName: formData.firstName,
             lastName: formData.lastName,
             username: formData.username,
-          }
+          } as any
         );
       }
 
