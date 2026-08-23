@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function LandingPage() {
-  // 1. Remove signInWithGoogle from the destructuring
   const { user, loading } = useAuth();
   const router = useRouter();
 
@@ -14,8 +13,7 @@ export default function LandingPage() {
     if (user) {
       router.push('/dashboard');
     } else {
-      // 2. Simply route the user to your existing signup/onboarding flow
-      router.push('/onboarding'); 
+      router.push('/signup');
     }
   };
 
@@ -139,7 +137,7 @@ export default function LandingPage() {
             <div className="text-2xl mb-2">🔔</div>
             <h3 className="font-bold text-white text-base mb-1">Smart Reminders</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Automated 8:00 AM and 8:00 PM checks keep you accountable without spamming you.
+              Automated custom notifications keep you accountable without spamming you.
             </p>
           </div>
 
