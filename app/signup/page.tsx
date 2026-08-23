@@ -51,14 +51,14 @@ export default function SignUpPage() {
     setLoading(true);
 
     try {
-      // Pass email, password, and metadata as 3 separate positional arguments
+      // Pass email, password, and metadata matching UserData interface
       if (signUp) {
         await signUp(
           formData.email,
           formData.password,
           {
-            first_name: formData.firstName,
-            last_name: formData.lastName,
+            firstName: formData.firstName,
+            lastName: formData.lastName,
             username: formData.username,
           }
         );
