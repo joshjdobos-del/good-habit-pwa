@@ -1,16 +1,15 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import InstallPrompt from '@/components/InstallPrompt';
 import './globals.css';
 
+export const viewport: Viewport = {
+  themeColor: '#0f172a',
+};
+
 export const metadata: Metadata = {
-  title: 'Good Habit - 30-Day Habit Tracker',
-  description: 'Build habits that stick with modular 30-day challenges.',
+  title: 'Good Habit | Easy Accountability',
+  description: 'Track your 30-day habit challenges and build consistency with local community accountability.',
   manifest: '/manifest.json',
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: 'black-translucent',
-    title: 'Good Habit',
-  },
 };
 
 export default function RootLayout({
@@ -20,7 +19,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="bg-slate-900 text-slate-100 antialiased">
+      <body className="antialiased bg-slate-900 text-slate-100">
         {children}
         <InstallPrompt />
       </body>

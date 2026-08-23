@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
@@ -10,12 +10,59 @@ export default function DashboardPage() {
   const router = useRouter();
 
   const [completedDays, setCompletedDays] = useState<number[]>([1, 2, 3, 4, 5]);
-  const [isAnonymous, setIsAnonymous] = useState(false); // Anonymity State
+  const [isAnonymous, setIsAnonymous] = useState(false);
+  
+  // PWA Install Prompt State
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isIOS, setIsIOS] = useState(false);
+  const [showInstallBanner, setShowInstallBanner] = useState(false);
+
   const currentDay = 6;
   const totalDays = 30;
   const habitTitle = '30 Days of Morning Movement';
 
   const isTodayCompleted = completedDays.includes(currentDay);
+
+  useEffect(() => {
+    // 1. Check if app is already running in PWA standalone mode
+    const isStandalone =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      (window.navigator as any).standalone === true;
+
+    if (isStandalone) return;
+
+    // 2. Detect iOS
+    const ua = window.navigator.userAgent.toLowerCase();
+    const iosDevice = /iphone|ipad|ipod/.test(ua);
+    setIsIOS(iosDevice);
+
+    // 3. Capture Android / Desktop Chrome install event
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShowInstallBanner(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    if (iosDevice) {
+      setShowInstallBanner(true);
+    }
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setShowInstallBanner(false);
+    }
+    setDeferredPrompt(null);
+  };
 
   const toggleToday = () => {
     if (isTodayCompleted) {
@@ -82,6 +129,46 @@ export default function DashboardPage() {
 
       {/* Main Content */}
       <main className="relative z-10 max-w-3xl w-full mx-auto px-6 pt-8 flex-1">
+
+        {/* Dashboard PWA Install Card (Only visible if not installed) */}
+        {showInstallBanner && (
+          <div className="bg-gradient-to-r from-emerald-950/40 via-slate-800/60 to-slate-800/40 border border-emerald-500/30 rounded-2xl p-4.5 mb-6 backdrop-blur-sm shadow-xl relative">
+            <button
+              onClick={() => setShowInstallBanner(false)}
+              className="absolute top-3 right-3 text-slate-400 hover:text-white text-xs font-bold p-1"
+            >
+              ✕
+            </button>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <img
+                  src="/icon-192.png"
+                  alt="Good Habit Logo"
+                  className="w-10 h-10 rounded-xl object-cover border border-emerald-500/30"
+                />
+                <div>
+                  <h3 className="text-xs font-extrabold text-white flex items-center gap-1.5">
+                    <span>📱</span> Install Good Habit App
+                  </h3>
+                  <p className="text-[11px] text-slate-300 mt-0.5">
+                    {isIOS
+                      ? 'Tap Share ⎋ then "Add to Home Screen" ➕ for 1-tap access.'
+                      : 'Add to home screen for daily check-in reminders & quick access.'}
+                  </p>
+                </div>
+              </div>
+
+              {!isIOS && deferredPrompt && (
+                <button
+                  onClick={handleInstallClick}
+                  className="w-full sm:w-auto shrink-0 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs py-2.5 px-4 rounded-xl transition-all shadow-md shadow-emerald-500/20"
+                >
+                  Add to Home Screen
+                </button>
+              )}
+            </div>
+          </div>
+        )}
         
         {/* Privacy / Identity Toggle */}
         <div className="bg-slate-800/50 border border-slate-800/80 rounded-2xl p-4 mb-6 backdrop-blur-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg">
