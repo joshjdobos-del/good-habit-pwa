@@ -51,19 +51,17 @@ export default function SignUpPage() {
     setLoading(true);
 
     try {
-      // Pass auth credentials & custom profile metadata
+      // Pass email, password, and metadata as 3 separate positional arguments
       if (signUp) {
-        await signUp({
-          email: formData.email,
-          password: formData.password,
-          options: {
-            data: {
-              first_name: formData.firstName,
-              last_name: formData.lastName,
-              username: formData.username,
-            },
-          },
-        });
+        await signUp(
+          formData.email,
+          formData.password,
+          {
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+            username: formData.username,
+          }
+        );
       }
 
       // Store display details locally for quick frontend access
