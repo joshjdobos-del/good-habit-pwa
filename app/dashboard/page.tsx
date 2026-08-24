@@ -10,7 +10,7 @@ export default function DashboardPage() {
   const router = useRouter();
 
   // Unique storage key per user (falls back to guest key)
-  const storageKey = user?.id ? `goodhabit_completed_days_${user.id}` : 'goodhabit_completed_days';
+  const storageKey = user?.uid ? `goodhabit_completed_days_${user.uid}` : 'goodhabit_completed_days';
 
   // Starts at 0 completed days for new users
   const [completedDays, setCompletedDays] = useState<number[]>([]);
@@ -36,6 +36,7 @@ export default function DashboardPage() {
   // Load returning user's saved progress from localStorage on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      // Load completed days progress
       const saved = localStorage.getItem(storageKey);
       if (saved) {
         try {
@@ -44,6 +45,13 @@ export default function DashboardPage() {
           console.error('Failed to parse saved progress:', err);
         }
       }
+
+      // Load saved 30-day habit title from signup
+      const savedHabit = localStorage.getItem('goodhabit_initial_habit');
+      if (savedHabit) {
+        setHabitTitle(savedHabit);
+      }
+
       setIsLoaded(true);
     }
   }, [storageKey]);
