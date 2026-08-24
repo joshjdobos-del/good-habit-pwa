@@ -6,37 +6,70 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function DashboardPage() {
-  const { signOut } = useAuth();
+  const { user, signOut } = useAuth();
   const router = useRouter();
 
-  const [completedDays, setCompletedDays] = useState<number[]>([1, 2, 3, 4, 5]);
+  // Unique storage key per user (falls back to guest key)
+  const storageKey = user?.id ? `goodhabit_completed_days_${user.id}` : 'goodhabit_completed_days';
+
+  // Starts at 0 completed days for new users
+  const [completedDays, setCompletedDays] = useState<number[]>([]);
   const [isAnonymous, setIsAnonymous] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
   
   // PWA Install Prompt State
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isIOS, setIsIOS] = useState(false);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
 
-  const currentDay = 6;
   const totalDays = 30;
-  const habitTitle = '30 Days of Morning Movement';
+  const habit = localStorage.getItem('goodhabit_initial_habit') || 'Your 30-Day Habit';
+
+  // Automatically determine current active day based on user progress (Day 1 for new users)
+  const currentDay = Math.min(
+    totalDays,
+    completedDays.length > 0 ? Math.max(...completedDays) + 1 : 1
+  );
 
   const isTodayCompleted = completedDays.includes(currentDay);
 
+  // Load returning user's saved progress from localStorage on mount
   useEffect(() => {
-    // 1. Check if app is already running in PWA standalone mode
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(storageKey);
+      if (saved) {
+        try {
+          setCompletedDays(JSON.parse(saved));
+        } catch (err) {
+          console.error('Failed to parse saved progress:', err);
+        }
+      }
+      setIsLoaded(true);
+    }
+  }, [storageKey]);
+
+  // Helper to update state and save to local storage
+  const saveCompletedDays = (newDays: number[]) => {
+    setCompletedDays(newDays);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(storageKey, JSON.stringify(newDays));
+    }
+  };
+
+  useEffect(() => {
+    // Check if app is already running in PWA standalone mode
     const isStandalone =
       window.matchMedia('(display-mode: standalone)').matches ||
       (window.navigator as any).standalone === true;
 
     if (isStandalone) return;
 
-    // 2. Detect iOS
+    // Detect iOS
     const ua = window.navigator.userAgent.toLowerCase();
     const iosDevice = /iphone|ipad|ipod/.test(ua);
     setIsIOS(iosDevice);
 
-    // 3. Capture Android / Desktop Chrome install event
+    // Capture Android / Desktop Chrome install event
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e);
@@ -65,11 +98,13 @@ export default function DashboardPage() {
   };
 
   const toggleToday = () => {
+    let updated: number[];
     if (isTodayCompleted) {
-      setCompletedDays((prev) => prev.filter((d) => d !== currentDay));
+      updated = completedDays.filter((d) => d !== currentDay);
     } else {
-      setCompletedDays((prev) => [...prev, currentDay]);
+      updated = [...completedDays, currentDay].sort((a, b) => a - b);
     }
+    saveCompletedDays(updated);
   };
 
   const handleSignOut = async () => {
@@ -80,6 +115,8 @@ export default function DashboardPage() {
       console.error('Sign out error:', err);
     }
   };
+
+  if (!isLoaded) return null; // Avoid hydration mismatch on initial mount
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col font-sans pb-24 sm:pb-12 selection:bg-emerald-500 selection:text-slate-900">
@@ -130,7 +167,7 @@ export default function DashboardPage() {
       {/* Main Content */}
       <main className="relative z-10 max-w-3xl w-full mx-auto px-6 pt-8 flex-1">
 
-        {/* Dashboard PWA Install Card (Only visible if not installed) */}
+        {/* Dashboard PWA Install Card */}
         {showInstallBanner && (
           <div className="bg-gradient-to-r from-emerald-950/40 via-slate-800/60 to-slate-800/40 border border-emerald-500/30 rounded-2xl p-4.5 mb-6 backdrop-blur-sm shadow-xl relative">
             <button
@@ -256,7 +293,7 @@ export default function DashboardPage() {
                   : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-emerald-500/20'
               }`}
             >
-              <span>{isTodayCompleted ? '✓ Completed' : 'Mark Day 6 Done'}</span>
+              <span>{isTodayCompleted ? '✓ Completed' : `Mark Day ${currentDay} Done`}</span>
             </button>
           </div>
 
@@ -275,15 +312,14 @@ export default function DashboardPage() {
                   <button
                     key={dayNum}
                     onClick={() => {
-                      if (dayNum <= currentDay) {
-                        setCompletedDays((prev) =>
-                          prev.includes(dayNum)
-                            ? prev.filter((d) => d !== dayNum)
-                            : [...prev, dayNum]
-                        );
+                      if (dayNum <= currentDay || isDone) {
+                        const updated = isDone
+                          ? completedDays.filter((d) => d !== dayNum)
+                          : [...completedDays, dayNum].sort((a, b) => a - b);
+                        saveCompletedDays(updated);
                       }
                     }}
-                    disabled={dayNum > currentDay}
+                    disabled={dayNum > currentDay && !isDone}
                     className={`aspect-square rounded-xl font-bold text-xs flex flex-col items-center justify-center transition-all ${
                       isDone
                         ? 'bg-emerald-500 border border-emerald-400 text-slate-950 shadow-md shadow-emerald-500/10'

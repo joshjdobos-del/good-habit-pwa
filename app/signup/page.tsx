@@ -15,6 +15,7 @@ export default function SignUpPage() {
     email: '',
     username: '',
     password: '',
+    habit: '',
   });
 
   const [error, setError] = useState('');
@@ -37,9 +38,10 @@ export default function SignUpPage() {
       !formData.lastName ||
       !formData.email ||
       !formData.username ||
-      !formData.password
+      !formData.password ||
+      !formData.habit
     ) {
-      setError('Please fill in all fields.');
+      setError('Please fill in all fields including your 30-day habit goal.');
       return;
     }
 
@@ -60,13 +62,19 @@ export default function SignUpPage() {
             firstName: formData.firstName,
             lastName: formData.lastName,
             username: formData.username,
+            habit: formData.habit,
           } as any
         );
       }
 
-      // Store display details locally for quick frontend access
+      // 1. Save new user info and habit goal
       localStorage.setItem('goodhabit_user_firstname', formData.firstName);
       localStorage.setItem('goodhabit_user_username', formData.username);
+      localStorage.setItem('goodhabit_initial_habit', formData.habit);
+
+      // 2. Clear any leftover habit progress and initialize Day 1
+      localStorage.setItem('goodhabit_completed_days', JSON.stringify([]));
+      localStorage.setItem('goodhabit_current_day', '1');
 
       router.push('/dashboard');
     } catch (err: any) {
@@ -146,6 +154,22 @@ export default function SignUpPage() {
               </div>
             </div>
 
+            {/* 30-Day Habit Goal Input */}
+            <div>
+              <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                Your 30-Day Habit Goal
+              </label>
+              <input
+                type="text"
+                name="habit"
+                value={formData.habit}
+                onChange={handleChange}
+                placeholder="e.g., Read 15 pages daily, 30 min workout"
+                required
+                className="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition-all"
+              />
+            </div>
+
             {/* Email Address */}
             <div>
               <label className="block text-xs font-bold text-slate-300 mb-1.5">
@@ -203,7 +227,7 @@ export default function SignUpPage() {
               disabled={loading}
               className="w-full bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-slate-950 font-extrabold text-xs py-3 px-4 rounded-xl transition-all shadow-lg shadow-emerald-500/20 mt-2"
             >
-              {loading ? 'Creating Account...' : 'Create Account & Start'}
+              {loading ? 'Creating Account...' : 'Create Account & Start Challenge'}
             </button>
           </form>
 
