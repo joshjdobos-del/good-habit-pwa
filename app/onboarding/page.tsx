@@ -42,7 +42,12 @@ export default function OnboardingPage() {
     } catch (err) {
       console.warn('Notification setup skipped or blocked:', err);
     } finally {
-      // Always route to dashboard regardless of permission result
+      // 💡 SAVE ONBOARDING PREFERENCES TO LOCALSTORAGE BEFORE REDIRECTING
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('goodhabit_initial_habit', habitName);
+        localStorage.setItem('goodhabit_user_location', location);
+      }
+
       setIsSubmitting(false);
       router.push('/dashboard');
     }
