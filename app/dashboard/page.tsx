@@ -17,13 +17,15 @@ export default function DashboardPage() {
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   
+  // 30-Day Habit Title State
+  const [habitTitle, setHabitTitle] = useState<string>('My 30-Day Goal');
+  
   // PWA Install Prompt State
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isIOS, setIsIOS] = useState(false);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
 
   const totalDays = 30;
-  const habit = localStorage.getItem('goodhabit_initial_habit') || 'Your 30-Day Habit';
 
   // Automatically determine current active day based on user progress (Day 1 for new users)
   const currentDay = Math.min(
